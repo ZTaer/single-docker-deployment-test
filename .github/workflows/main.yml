@@ -18,7 +18,7 @@ jobs:
     steps:
       # 步骤 1: 检出代码
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         # 说明: 使用官方的 actions/checkout@v2 Action 将仓库代码检出到 GitHub Actions 的 runner 环境中。
         # 目的: 确保后续步骤能够访问到最新的项目文件。
 
