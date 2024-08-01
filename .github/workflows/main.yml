@@ -39,3 +39,42 @@ jobs:
         run: docker run -e CI=true oo7/docker-react-test yarn lint
         # 说明: 使用 docker run 命令运行构建好的 Docker 镜像，并执行 yarn test 命令进行测试。
         # 目的: 在 Docker 容器中运行测试，以确保代码在隔离环境中能正常工作。
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' # 仅当推送到 main 分支时部署
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Build Docker image
+        run: docker build -t oo7/docker-react-test-prod .
+
+      - name: Deploy to S3 and Elastic Beanstalk
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        run: |
+          # 安装 AWS CLI
+          pip install awscli
+
+          # 配置 AWS CLI
+          aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
+          aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
+          aws configure set default.region ap-east-1
+
+          # 打包应用
+          zip -r deploy.zip .
+
+          # 上传到 S3
+          aws s3 cp deploy.zip s3://elasticbeanstalk-ap-east-1-863942635279/github-actions-docker/deploy.zip
+
+          # 创建新的应用版本
+          aws elasticbeanstalk create-application-version --application-name github-actions-docker --version-label v${{ github.run_number }} --source-bundle S3Bucket=elasticbeanstalk-ap-east-1-863942635279,S3Key=github-actions-docker/deploy.zip
+
+          # 部署到 Elastic Beanstalk
+          aws elasticbeanstalk update-environment --environment-name Github-actions-docker-env --version-label v${{ github.run_number }}

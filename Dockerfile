@@ -27,6 +27,9 @@ CMD [ "yarn", "build" ]
 # 基础环境，选择 Nginx 镜像
 FROM nginx:1.27.0
 
+# 暴露端口
+EXPOSE 80
+
 # 从builder中拷贝构建结果
 COPY --from=builder /app/dist /usr/share/nginx/html
 
