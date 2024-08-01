@@ -34,8 +34,8 @@ jobs:
         # 说明: 使用 docker build 命令构建 Docker 镜像。
         # 目的: 构建一个名为 react-test 的 Docker 镜像，使用项目根目录中的 Dockerfile.dev 文件。
 
-      # 步骤 4: 运行测试
-      - name: Run tests
+      # 步骤 4: 运行格式化 ( 代替测试示例 )
+      - name: Run lint
         run: docker run -e CI=true oo7/docker-react-test yarn lint
         # 说明: 使用 docker run 命令运行构建好的 Docker 镜像，并执行 yarn test 命令进行测试。
         # 目的: 在 Docker 容器中运行测试，以确保代码在隔离环境中能正常工作。
