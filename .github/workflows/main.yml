@@ -67,7 +67,7 @@ jobs:
         run: |
           aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
           aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
-          aws configure set default.region us-west-2
+          aws configure set default.region ap-east-1
           aws s3 cp deploy.zip s3://elasticbeanstalk-ap-east-1-863942635279/github-actions-docker/deploy-${{ github.run_number }}.zip
         # 说明: 将打包的应用上传到 S3。
 
@@ -87,5 +87,5 @@ jobs:
           version_label: ${{ github.run_number }}
           s3_bucket: elasticbeanstalk-ap-east-1-863942635279
           s3_key: github-actions-docker/deploy-${{ github.run_number }}.zip
-          region: us-west-2
+          region: ap-east-1
         # 说明: 使用 einaregilsson/beanstalk-deploy Action 将应用部署到 AWS Elastic Beanstalk。
