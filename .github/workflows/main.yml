@@ -67,9 +67,11 @@ jobs:
           aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           application_name: github-actions-docker
           environment_name: Github-actions-docker-env
-          version_label: deploy-${{ github.run_number }}
+          version_label: deploy
           region: ap-east-1
           deployment_package: deploy.zip
+          s3_bucket: elasticbeanstalk-ap-east-1-863942635279
+          s3_key: github-actions-docker/deploy.zip
 
   #     - name: Upload to S3
   #       env:
