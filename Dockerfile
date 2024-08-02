@@ -2,7 +2,7 @@
 
 # 基础环境，选择带有预装 Yarn 的 Node.js 镜像
 #   a) AS builder: 给镜像命名, 为了后续的多阶段构建
-FROM node:18-alpine AS builder
+FROM node:18-alpine AS builder-prod
 
 # 工作目录
 WORKDIR '/app'
@@ -20,7 +20,8 @@ COPY . .
 EXPOSE 5173
 
 # 启动项目
-CMD [ "yarn", "build" ]
+# CMD [ "yarn", "build" ]
+RUN yarn build
 
 ######Nginx######
 
@@ -31,7 +32,7 @@ FROM nginx:1.27.0
 EXPOSE 80
 
 # 从builder中拷贝构建结果
-COPY --from=builder /app/dist /usr/share/nginx/html
+COPY --from=builder-prod /app/dist /usr/share/nginx/html
 
 
 
