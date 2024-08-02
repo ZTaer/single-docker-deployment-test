@@ -55,13 +55,10 @@ jobs:
       - name: Build Docker image
         run: docker build -t oo7/docker-react-test-prod .
 
-      - name: Package application
-        run: |
-          mkdir -p deploy
-          cp -R dist deploy/
-          cd deploy
-          zip -r deploy.zip .
-        # 说明: 打包应用为 deploy.zip 文件，以便后续上传到 S3。
+        # 保存镜像为 tar 文件
+      - name: Save Docker image to tar
+        run: docker save oo7/docker-react-test-prod -o deploy.zip
+        # 说明: 将 Docker 镜像保存为 tar 文件。
 
       - name: Upload to S3
         env:
