@@ -77,6 +77,12 @@ jobs:
     if: github.ref == 'refs/heads/main' # 仅当推送到 main 分支时部署
 
     steps:
+      - name: Verify S3 Upload
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        run: |
+          aws s3 ls s3://elasticbeanstalk-ap-east-1-863942635279/github-actions-docker/
       - name: Deploy to EB
         uses: einaregilsson/beanstalk-deploy@v22
         with:
@@ -84,7 +90,7 @@ jobs:
           aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           application_name: github-actions-docker
           environment_name: Github-actions-docker-env
-          version_label: ${{ github.run_number }}
+          version_label: deploy-${{ github.run_number }}
           s3_bucket: elasticbeanstalk-ap-east-1-863942635279
           s3_key: github-actions-docker/deploy-${{ github.run_number }}.zip
           region: ap-east-1
