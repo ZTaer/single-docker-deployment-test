@@ -57,7 +57,7 @@ jobs:
 
         # 保存镜像为 tar 文件
       - name: Save Docker image to tar
-        run: docker save oo7/docker-react-test-prod -o deploy.zip
+        run: docker save oo7/docker-react-test-prod -o deploy-${{ github.run_number }}.zip
         # 说明: 将 Docker 镜像保存为 tar 文件。
 
       - name: Deploy to EB
@@ -67,11 +67,11 @@ jobs:
           aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           application_name: github-actions-docker
           environment_name: Github-actions-docker-env
-          version_label: deploy
+          version_label: deploy-${{ github.run_number }}
           region: ap-east-1
-          deployment_package: deploy.zip
+          deployment_package: deploy-${{ github.run_number }}.zip
           s3_bucket: elasticbeanstalk-ap-east-1-863942635279
-          s3_key: github-actions-docker/deploy.zip
+          s3_key: github-actions-docker/deploy-${{ github.run_number }}.zip
 
   #     - name: Upload to S3
   #       env:
