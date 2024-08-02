@@ -1,8 +1,8 @@
 ######Node.js######
 
 # 基础环境，选择带有预装 Yarn 的 Node.js 镜像
-#   a) as builder: 给镜像命名, 为了后续的多阶段构建
-FROM node:18-alpine as builder
+#   a) AS builder: 给镜像命名, 为了后续的多阶段构建
+FROM node:18-alpine AS builder
 
 # 工作目录
 WORKDIR /app
