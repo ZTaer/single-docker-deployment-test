@@ -68,8 +68,9 @@ jobs:
           aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
           aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
           aws configure set default.region ap-east-1
+          # 说明: 将打包的应用上传到 S3。
           aws s3 cp deploy.zip s3://elasticbeanstalk-ap-east-1-863942635279/github-actions-docker/deploy-${{ github.run_number }}.zip
-        # 说明: 将打包的应用上传到 S3。
+          aws s3 ls s3://elasticbeanstalk-ap-east-1-863942635279/github-actions-docker/
 
   deploy:
     needs: build # 确保 deploy 作业在 build 作业完成后运行
@@ -77,12 +78,6 @@ jobs:
     if: github.ref == 'refs/heads/main' # 仅当推送到 main 分支时部署
 
     steps:
-      - name: Verify S3 Upload
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        run: |
-          aws s3 ls s3://elasticbeanstalk-ap-east-1-863942635279/github-actions-docker/
       - name: Deploy to EB
         uses: einaregilsson/beanstalk-deploy@v22
         with:
