@@ -1,9 +1,9 @@
-name: CI
+name: CI and Deploy to AWS Elastic Beanstalk
 
 on:
   push:
     branches:
-      - main # 你希望触发 CI 的分支
+      - main # 触发 CI 的分支
   pull_request:
     branches:
       - main
@@ -12,14 +12,14 @@ on:
       - main
 
 jobs:
-  build:
+  lint:
     runs-on: ubuntu-latest # 指定工作流运行的环境
 
     steps:
       # 步骤 1: 检出代码
       - name: Checkout code
         uses: actions/checkout@v4
-        # 说明: 使用官方的 actions/checkout@v2 Action 将仓库代码检出到 GitHub Actions 的 runner 环境中。
+        # 说明: 使用官方的 actions/checkout@v4 Action 将仓库代码检出到 GitHub Actions 的 runner 环境中。
         # 目的: 确保后续步骤能够访问到最新的项目文件。
 
       # 步骤 2: 设置 Docker Buildx
@@ -32,15 +32,16 @@ jobs:
       - name: Build Docker image
         run: docker build -t oo7/docker-react-test -f ./Dockerfile.dev .
         # 说明: 使用 docker build 命令构建 Docker 镜像。
-        # 目的: 构建一个名为 react-test 的 Docker 镜像，使用项目根目录中的 Dockerfile.dev 文件。
+        # 目的: 构建一个名为 oo7/docker-react-test 的 Docker 镜像，使用项目根目录中的 Dockerfile.dev 文件。
 
       # 步骤 4: 运行格式化 ( 代替测试示例 )
       - name: Run lint
         run: docker run -e CI=true oo7/docker-react-test yarn lint
-        # 说明: 使用 docker run 命令运行构建好的 Docker 镜像，并执行 yarn test 命令进行测试。
-        # 目的: 在 Docker 容器中运行测试，以确保代码在隔离环境中能正常工作。
-  deploy:
-    needs: build
+        # 说明: 使用 docker run 命令运行构建好的 Docker 镜像，并执行 yarn lint 命令进行代码格式检查。
+        # 目的: 在 Docker 容器中运行代码格式检查，以确保代码在隔离环境中能正常工作。
+
+  build:
+    needs: lint # 确保 build 作业在 lint 作业完成后运行
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' # 仅当推送到 main 分支时部署
 
@@ -54,27 +55,40 @@ jobs:
       - name: Build Docker image
         run: docker build -t oo7/docker-react-test-prod .
 
-      - name: Deploy to S3 and Elastic Beanstalk
+      - name: Package application
+        run: |
+          mkdir -p deploy
+          cp -R dist deploy/
+          cd deploy
+          zip -r deploy.zip .
+        # 说明: 打包应用为 deploy.zip 文件，以便后续上传到 S3。
+
+      - name: Upload to S3
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run: |
-          # 安装 AWS CLI
-          pip install awscli
-
-          # 配置 AWS CLI
           aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
           aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
-          aws configure set default.region ap-east-1
+          aws configure set default.region us-west-2
+          aws s3 cp deploy.zip s3://elasticbeanstalk-ap-east-1-863942635279/github-actions-docker/deploy-${{ github.run_number }}.zip
+        # 说明: 将打包的应用上传到 S3。
 
-          # 打包应用
-          zip -r deploy.zip .
+  deploy:
+    needs: build # 确保 deploy 作业在 build 作业完成后运行
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' # 仅当推送到 main 分支时部署
 
-          # 上传到 S3
-          aws s3 cp deploy.zip s3://elasticbeanstalk-ap-east-1-863942635279/github-actions-docker/deploy.zip
-
-          # 创建新的应用版本
-          aws elasticbeanstalk create-application-version --application-name github-actions-docker --version-label v${{ github.run_number }} --source-bundle S3Bucket=elasticbeanstalk-ap-east-1-863942635279,S3Key=github-actions-docker/deploy.zip
-
-          # 部署到 Elastic Beanstalk
-          aws elasticbeanstalk update-environment --environment-name Github-actions-docker-env --version-label v${{ github.run_number }}
+    steps:
+      - name: Deploy to EB
+        uses: einaregilsson/beanstalk-deploy@v22
+        with:
+          aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          application_name: github-actions-docker
+          environment_name: Github-actions-docker-env
+          version_label: ${{ github.run_number }}
+          s3_bucket: elasticbeanstalk-ap-east-1-863942635279
+          s3_key: github-actions-docker/deploy-${{ github.run_number }}.zip
+          region: us-west-2
+        # 说明: 使用 einaregilsson/beanstalk-deploy Action 将应用部署到 AWS Elastic Beanstalk。
