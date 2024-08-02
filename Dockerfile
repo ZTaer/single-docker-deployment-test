@@ -5,7 +5,7 @@
 FROM node:18-alpine AS builder
 
 # 工作目录
-WORKDIR /app
+WORKDIR '/app'
 
 # 复制依赖文件
 COPY ./package.json ./yarn.lock ./
@@ -14,7 +14,7 @@ COPY ./package.json ./yarn.lock ./
 RUN yarn install
 
 # 拷贝其他内容
-COPY ./ ./
+COPY . .
 
 # 暴露端口
 EXPOSE 5173
