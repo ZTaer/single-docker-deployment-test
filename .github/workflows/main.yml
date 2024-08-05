@@ -69,5 +69,6 @@ jobs:
           region: ap-east-1
           version_label: deploy-${{ github.run_number }}
           deployment_package: deploy.zip
+          use_existing_version_if_available: true # 如果已存在相同版本，则使用该版本, 方便回滚项目
         # 说明: 使用 einaregilsson/beanstalk-deploy@v18 Action 将生成的部署包上传并部署到 AWS Elastic Beanstalk。
         # 目的: 自动化部署应用程序到 Elastic Beanstalk，确保每次代码变更后都能及时部署最新版本。
