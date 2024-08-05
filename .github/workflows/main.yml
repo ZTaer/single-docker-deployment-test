@@ -44,6 +44,9 @@ jobs:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' # 仅当推送到 main 分支时部署
     steps:
+      - name: Init
+        uses: actions/checkout@v3
+
       - name: Generate deployment package
         run: zip -r deploy.zip . -x '*.git*'
 
