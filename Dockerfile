@@ -20,7 +20,7 @@ COPY . .
 EXPOSE 5173
 
 # 启动项目
-# CMD [ "yarn", "build" ]
+# CMD [ "yarn", "build" ] 注意：这里不能使用 CMD，因为 CMD 是在容器启动时执行的，而这里是构建镜像时执行的，所以使用 RUN
 RUN yarn build
 
 ######Nginx######

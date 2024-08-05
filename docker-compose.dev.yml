@@ -1,19 +1,21 @@
-version: "3"
+version: "3" # 指定 Docker Compose 文件的版本
+
 services:
   web:
     build:
       context: ./
-      dockerfile: Dockerfile.dev # 指定 Dockerfile 文件
+      dockerfile: Dockerfile.dev # 指定用于构建镜像的 Dockerfile 文件
     ports:
-      - "5173:5173"
+      - "5173:5173" # 将主机的 5173 端口映射到容器的 5173 端口
     volumes: # 挂载本地文件到容器
       - /app/node_modules # 防止容器中的 node_modules 覆盖本地的 node_modules
       - ./:/app # 挂载当前目录到容器的 /app 目录
+
   other:
     build:
       context: ./
-      dockerfile: Dockerfile.dev
-    volumes:
-      - /app/node_modules
-      - ./:/app
-    command: ["yarn", "lint"] # 覆盖默认的启动命令
+      dockerfile: Dockerfile.dev # 指定用于构建镜像的 Dockerfile 文件
+    volumes: # 挂载本地文件到容器
+      - /app/node_modules # 防止容器中的 node_modules 覆盖本地的 node_modules
+      - ./:/app # 挂载当前目录到容器的 /app 目录
+    command: ["yarn", "lint"] # 覆盖默认的启动命令，执行 yarn lint 命令进行代码格式检查

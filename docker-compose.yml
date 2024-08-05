@@ -1,8 +1,9 @@
-version: "3"
+version: "3" # 指定 Docker Compose 文件的版本
+
 services:
   web:
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: . # 设置构建上下文为当前目录
+      dockerfile: Dockerfile # 指定用于构建镜像的 Dockerfile 文件
     ports:
-      - "80:80"
+      - "80:80" # 将主机的 80 端口映射到容器的 80 端口
