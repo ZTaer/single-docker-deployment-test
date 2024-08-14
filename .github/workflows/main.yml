@@ -67,7 +67,7 @@ jobs:
           environment_name: ${{ vars.AWS_ENVIRONMENT_NAME }}
           existing_bucket_name: ${{ vars.AWS_EXISTING_BUCKET_NAME }}
           region: ${{ vars.AWS_REGION }}
-          version_label: deploy-${{ github.run_number }}
+          version_label: deploy-${{ github.run_id }}
           deployment_package: deploy.zip
           use_existing_version_if_available: true # 如果已存在相同版本，则使用该版本, 方便回滚项目
         # 说明: 使用 einaregilsson/beanstalk-deploy@v18 Action 将生成的部署包上传并部署到 AWS Elastic Beanstalk。
